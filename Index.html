@@ -915,10 +915,27 @@
 // =====================
 // ESTADO GLOBAL
 // =====================
-let config = JSON.parse(localStorage.getItem('tienda_config') || '{}');
-let productos = JSON.parse(localStorage.getItem('tienda_productos') || '[]');
+const CONFIG_DEFAULT = {
+  sheetUrl: "hardcoded",
+  mpAlias: "Venta.gira.m19",
+  webhookUrl: "https://script.google.com/macros/s/AKfycbz2Pnx8XrlzTDC2gS9uRhqZFntU0Tlc67C3HCt5gFK6JJJRmldLOV_Bs346uEdB8rtZFw/exec"
+};
+
+const PRODUCTOS_DEFAULT = [
+  {id:0,nombre:"Mate San Roque",stock:11,precio:28000,imagen:null,categoria:"Mates"},
+  {id:1,nombre:"Mate San Andrés",stock:17,precio:24000,imagen:null,categoria:"Mates"},
+  {id:2,nombre:"Termo Iguazú",stock:6,precio:60000,imagen:null,categoria:"Termos"},
+  {id:3,nombre:"Botella Circuit",stock:10,precio:15000,imagen:null,categoria:"Botellas"},
+  {id:4,nombre:"Botella Handler Hydra",stock:0,precio:45000,imagen:null,categoria:"Botellas"},
+  {id:5,nombre:"Llavero POP",stock:20,precio:5000,imagen:null,categoria:"Llaveros"},
+  {id:6,nombre:"Llavero Carbono",stock:4,precio:9000,imagen:null,categoria:"Llaveros"},
+  {id:7,nombre:"Bombilla Acero 17cm",stock:25,precio:4000,imagen:null,categoria:"Accesorios"}
+];
+
+let config = CONFIG_DEFAULT;
+let productos = JSON.parse(localStorage.getItem('tienda_productos') || 'null') || PRODUCTOS_DEFAULT;
 let ventas = JSON.parse(localStorage.getItem('tienda_ventas') || '[]');
-let carrito = {}; // { id: cantidad }
+let carrito = {};
 let pasoActual = 1;
 let comprobanteBase64 = null;
 
@@ -926,12 +943,9 @@ let comprobanteBase64 = null;
 // INIT
 // =====================
 window.onload = () => {
-  if (config.sheetUrl) {
-    mostrarPantalla('productos');
-    cargarProductosDesdeSheet();
-  } else {
-    mostrarPantalla('config');
-  }
+  document.getElementById('sheet-status-text').textContent = 'Stock cargado ✓';
+  mostrarPantalla('productos');
+  renderProductos(productos);
 };
 
 // =====================
