@@ -969,32 +969,25 @@ function guardarConfig() {
 // CARGAR PRODUCTOS
 // =====================
 async function cargarProductosDesdeSheet() {
-  document.getElementById('sheet-status-text').textContent = 'Cargando...';
-
-  // Si hay datos en localStorage los usamos (modo offline / demo)
-  if (productos.length > 0) {
-    renderProductos(productos);
-    document.getElementById('sheet-status-text').textContent = 'Stock cargado (local)';
-    return;
-  }
-
-  if (!config.sheetUrl) return;
-
+  document.getElementById("sheet-status-text").textContent = "Cargando stock...";
   try {
-    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(config.sheetUrl)}`;
-    const res = await fetch(url);
+    const res = await fetch(config.webhookUrl, { method: "GET" });
     const data = await res.json();
-    const csv = data.contents;
-    productos = parsearCSV(csv);
-    localStorage.setItem('tienda_productos', JSON.stringify(productos));
-    renderProductos(productos);
-    document.getElementById('sheet-status-text').textContent = 'Conectado a Sheet ✓';
+    if (Array.isArray(data) && data.length > 0) {
+      productos = data;
+      localStorage.setItem("tienda_productos", JSON.stringify(productos));
+      renderProductos(productos);
+      document.getElementById("sheet-status-text").textContent = "Stock en tiempo real u2713";
+    } else { throw new Error("Sin datos"); }
   } catch (e) {
-    // Datos demo si falla la conexión
-    productos = getDemoProductos();
-    localStorage.setItem('tienda_productos', JSON.stringify(productos));
-    renderProductos(productos);
-    document.getElementById('sheet-status-text').textContent = 'Modo demo (sin conexión)';
+    if (productos.length > 0) {
+      renderProductos(productos);
+      document.getElementById("sheet-status-text").textContent = "Stock cargado (local)";
+    } else {
+      productos = PRODUCTOS_DEFAULT;
+      renderProductos(productos);
+      document.getElementById("sheet-status-text").textContent = "Stock cargado u2713";
+    }
   }
 }
 
