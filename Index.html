@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tienda del Colegio</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --card: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8f135;
+    --accent2: #f1c135;
+    --text: #f0f0f0;
+    --muted: #777;
+    --danger: #ff4d4d;
+    --success: #4dff91;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  header {
+    padding: 2rem 2rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    line-height: 1;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+
+  .logo span { color: var(--text); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 300;
+    margin-bottom: 0.3rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .sheet-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    gap: 0;
+    padding: 1.5rem 2rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.5rem 0.8rem 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+  }
+
+  .step::after {
+    content: '→';
+    margin-left: 1rem;
+    color: var(--border);
+  }
+
+  .step:last-child::after { display: none; }
+
+  .step.active { color: var(--accent); }
+  .step.done { color: var(--success); }
+
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* MAIN */
+  main {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* SCREENS */
+  .screen { display: none; animation: fadeIn 0.3s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SCREEN 1 - Config */
+  .config-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .config-box h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    margin-bottom: 0.4rem;
+    color: var(--accent);
+  }
+
+  .config-box p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  input[type="text"], input[type="url"], input[type="file"], textarea {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 1rem;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  input[type="file"] {
+    cursor: pointer;
+    padding: 0.6rem 1rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.8rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .btn:hover {
+    background: #d9ff3d;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(200,241,53,0.25);
+  }
+
+  .btn:active { transform: translateY(0); }
+
+  .btn.secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn.secondary:hover {
+    background: var(--card);
+    box-shadow: none;
+  }
+
+  .btn.danger { background: var(--danger); color: #fff; }
+  .btn.success { background: var(--success); color: #000; }
+
+  /* GRID PRODUCTOS */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    margin-bottom: 0.3rem;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .producto-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .producto-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .producto-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .producto-card.agotado {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .producto-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--border);
+  }
+
+  .producto-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .producto-info {
+    padding: 0.9rem;
+  }
+
+  .producto-nombre {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
+  }
+
+  .producto-precio {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: var(--accent2);
+    letter-spacing: 0.5px;
+  }
+
+  .producto-stock {
+    font-size: 0.75rem;
+    margin-top: 0.3rem;
+  }
+
+  .stock-ok { color: var(--muted); }
+  .stock-low { color: var(--accent2); }
+  .stock-out { color: var(--danger); }
+
+  .badge-agotado {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .check-icon {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 26px; height: 26px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .producto-card.selected .check-icon {
+    display: flex;
+  }
+
+  /* CANTIDAD */
+  .qty-selector {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    width: fit-content;
+    margin-top: 0.5rem;
+  }
+
+  .qty-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.1rem;
+    width: 34px; height: 34px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .qty-btn:hover { background: var(--card); }
+
+  .qty-val {
+    font-weight: 700;
+    min-width: 34px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+
+  /* RESUMEN CARRITO */
+  .carrito {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .carrito h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    color: var(--accent);
+  }
+
+  .carrito-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+
+  .carrito-item:last-child { border-bottom: none; }
+
+  .carrito-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+  }
+
+  .total-label {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .total-precio {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--accent2);
+  }
+
+  /* PAGO */
+  .mp-box {
+    background: linear-gradient(135deg, #009ee3 0%, #00c3f5 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .mp-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: #fff;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  .mp-info { color: #fff; }
+  .mp-info strong { font-size: 1.1rem; display: block; margin-bottom: 0.2rem; }
+  .mp-info span { font-size: 0.85rem; opacity: 0.9; }
+
+  .mp-alias {
+    margin-left: auto;
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: center;
+  }
+
+  .mp-alias:hover { background: rgba(255,255,255,0.3); }
+  .mp-alias small { display: block; font-family: 'DM Sans', sans-serif; font-size: 0.65rem; font-weight: 400; opacity: 0.8; text-transform: uppercase; }
+
+  /* UPLOAD */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(200,241,53,0.03);
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+    border: none;
+  }
+
+  .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .upload-text { font-size: 0.9rem; color: var(--muted); }
+  .upload-text strong { color: var(--text); }
+
+  .preview-img {
+    max-height: 200px;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  /* FORM FIELDS */
+  .form-row {
+    margin-bottom: 1rem;
+  }
+
+  /* SUCCESS */
+  .success-screen {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .success-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .success-screen h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    color: var(--success);
+    margin-bottom: 0.5rem;
+  }
+
+  .success-screen p { color: var(--muted); margin-bottom: 2rem; }
+
+  /* ADMIN PANEL */
+  .admin-toggle {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 46px; height: 46px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+    z-index: 100;
+  }
+
+  .admin-toggle:hover {
+    border-color: var(--accent);
+    background: var(--card);
+  }
+
+  .admin-panel {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    overflow-y: auto;
+    padding: 2rem;
+  }
+
+  .admin-panel.open { display: block; }
+
+  .admin-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .admin-inner h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  th {
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td input[type="number"] {
+    width: 70px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    color: var(--text);
+    font-size: 0.85rem;
+    margin-bottom: 0;
+  }
+
+  .ventas-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .venta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.75rem;
+    background: var(--card);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    font-size: 0.82rem;
+    gap: 1rem;
+  }
+
+  .venta-info { flex: 1; }
+  .venta-info strong { display: block; margin-bottom: 0.2rem; }
+  .venta-info span { color: var(--muted); }
+
+  .venta-comprobante img {
+    max-height: 60px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: var(--success);
+    color: #000;
+    padding: 0.75rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 500;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+  }
+
+  .notif.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+
+  .chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--muted);
+  }
+
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  .helper {
+    background: var(--card);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .helper strong { color: var(--text); }
+
+  @media (max-width: 600px) {
+    header { flex-wrap: wrap; gap: 0.75rem; }
+    .logo { font-size: 2.2rem; }
+    .steps { flex-wrap: wrap; padding: 1rem; }
+    main { padding: 1rem; }
+    .productos-grid { grid-template-columns: repeat(2, 1fr); }
+    .mp-alias { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">TIENDA<span>.</span></div>
+    <div class="subtitle">Sistema de ventas</div>
+  </div>
+  <div class="sheet-status">
+    <div class="dot"></div>
+    <span id="sheet-status-text">Sin conectar</span>
+  </div>
+</header>
+
+<div class="steps">
+  <div class="step active" id="step1"><div class="step-num">1</div> Productos</div>
+  <div class="step" id="step2"><div class="step-num">2</div> Datos</div>
+  <div class="step" id="step3"><div class="step-num">3</div> Pago</div>
+  <div class="step" id="step4"><div class="step-num">4</div> Confirmación</div>
+</div>
+
+<main>
+
+  <!-- PANTALLA CONFIG (primera vez) -->
+  <div class="screen active" id="screen-config">
+    <div class="config-box">
+      <h2>Configuración inicial</h2>
+      <p>Conectá tu Google Sheet y completá los datos del vendedor. Solo necesitás hacerlo una vez.</p>
+
+      <label>URL de tu Google Sheet (publicado como CSV)</label>
+      <input type="url" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/TU_ID/export?format=csv&gid=0">
+
+      <label>Alias de Mercado Pago</label>
+      <input type="text" id="mp-alias" placeholder="ej: nombre.apellido.mp">
+
+      <label>URL del webhook (Google Apps Script) para registrar ventas</label>
+      <input type="url" id="webhook-url" placeholder="https://script.google.com/macros/s/TU_SCRIPT/exec">
+
+      <div class="helper">
+        <strong>¿Cómo obtener la URL del Sheet?</strong><br>
+        En Google Sheets → Archivo → Compartir → Publicar en la web → seleccioná "Valores separados por comas (.csv)" → copiá el link generado.
+      </div>
+
+      <button class="btn" onclick="guardarConfig()">Guardar y cargar productos →</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA 1 - PRODUCTOS -->
+  <div class="screen" id="screen-productos">
+    <div class="section-title">Elegí tus productos</div>
+    <div class="section-sub">Seleccioná lo que querés comprar y la cantidad</div>
+
+    <div class="chips" id="chips-filtro"></div>
+    <div class="productos-grid" id="grid-productos"></div>
+
+    <div class="carrito" id="carrito" style="display:none">
+      <h3>Tu pedido</h3>
+      <div id="carrito-items"></div>
+      <div class="carrito-total">
+        <span class="total-label">Total</span>
+        <span class="total-precio" id="total-precio">$0</span>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="irAPaso2()">Continuar →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANTALLA 2 - DATOS -->
+  <div class="screen" id="screen-datos">
+    <div class="section-title">Tus datos</div>
+    <div class="section-sub">¿A quién le asignamos el pedido?</div>
+
+    <div class="form-row">
+      <label>Nombre completo</label>
+      <input type="text" id="nombre-comprador" placeholder="Nombre y apellido">
+    </div>
+
+    <div class="actions">
+      <button class="btn secondary" onclick="irAPaso(1)">← Volver</button>
+      <button class="btn" onclick="irAPaso3()">Ir al pago →</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA 3 - PAGO -->
+  <div class="screen" id="screen-pago">
+    <div class="section-title">Realizá el pago</div>
+    <div class="section-sub">Transferí el total por Mercado Pago y subí el comprobante</div>
+
+    <div class="mp-box" id="mp-box">
+      <div class="mp-logo">Mercado<br>Pago</div>
+      <div class="mp-info">
+        <strong>Transferí a este alias</strong>
+        <span>Monto exacto: <b id="monto-pagar">$0</b></span>
+      </div>
+      <div class="mp-alias" id="alias-display" onclick="copiarAlias()">
+        <span id="alias-text">—</span>
+        <small>tap para copiar</small>
+      </div>
+    </div>
+
+    <label>Subí el comprobante de pago</label>
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="comprobante-file" accept="image/*" onchange="previewComprobante(this)">
+      <div class="upload-icon">📎</div>
+      <div class="upload-text"><strong>Tocá para subir</strong><br>o arrastrá una imagen aquí</div>
+      <img id="comprobante-preview" class="preview-img" style="display:none">
+    </div>
+
+    <div class="actions">
+      <button class="btn secondary" onclick="irAPaso(2)">← Volver</button>
+      <button class="btn success" onclick="confirmarPedido()">✓ Confirmar pedido</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA 4 - ÉXITO -->
+  <div class="screen" id="screen-exito">
+    <div class="success-screen">
+      <div class="success-icon">🎉</div>
+      <h2>¡Pedido confirmado!</h2>
+      <p>Tu pedido fue registrado correctamente.<br>El pago será verificado en breve.</p>
+      <div id="resumen-final"></div>
+      <br>
+      <button class="btn" onclick="nuevoOrden()">Hacer otro pedido</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- PANEL ADMIN -->
+<div class="admin-toggle" onclick="toggleAdmin()" title="Panel admin">⚙️</div>
+
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-inner">
+    <h2>Panel de administración</h2>
+
+    <label>Contraseña de admin</label>
+    <input type="text" id="admin-pass" placeholder="admin123" style="margin-bottom:1rem">
+    <button class="btn secondary" onclick="verificarAdmin()" style="margin-bottom:1.5rem">Ingresar</button>
+
+    <div id="admin-content" style="display:none">
+
+      <h3 style="font-family:'Bebas Neue',sans-serif;letter-spacing:1px;color:var(--accent);font-size:1.4rem;margin-bottom:1rem;">Stock actual</h3>
+      <table id="tabla-stock">
+        <thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr></thead>
+        <tbody id="tbody-stock"></tbody>
+      </table>
+      <button class="btn" onclick="guardarStock()" style="margin-bottom:2rem">Guardar cambios</button>
+
+      <hr>
+
+      <h3 style="font-family:'Bebas Neue',sans-serif;letter-spacing:1px;color:var(--accent);font-size:1.4rem;margin-bottom:1rem;">Ventas registradas</h3>
+      <div class="ventas-list" id="ventas-list"></div>
+
+      <hr>
+
+      <button class="btn secondary" onclick="exportarCSV()">⬇ Exportar ventas CSV</button>
+      <button class="btn secondary" onclick="toggleAdmin()">✕ Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// =====================
+// ESTADO GLOBAL
+// =====================
+let config = JSON.parse(localStorage.getItem('tienda_config') || '{}');
+let productos = JSON.parse(localStorage.getItem('tienda_productos') || '[]');
+let ventas = JSON.parse(localStorage.getItem('tienda_ventas') || '[]');
+let carrito = {}; // { id: cantidad }
+let pasoActual = 1;
+let comprobanteBase64 = null;
+
+// =====================
+// INIT
+// =====================
+window.onload = () => {
+  if (config.sheetUrl) {
+    mostrarPantalla('productos');
+    cargarProductosDesdeSheet();
+  } else {
+    mostrarPantalla('config');
+  }
+};
+
+// =====================
+// CONFIG
+// =====================
+function guardarConfig() {
+  const url = document.getElementById('sheet-url').value.trim();
+  const alias = document.getElementById('mp-alias').value.trim();
+  const webhook = document.getElementById('webhook-url').value.trim();
+
+  if (!url || !alias) { notif('Completá la URL del Sheet y el alias de MP', true); return; }
+
+  config = { sheetUrl: url, mpAlias: alias, webhookUrl: webhook };
+  localStorage.setItem('tienda_config', JSON.stringify(config));
+
+  mostrarPantalla('productos');
+  cargarProductosDesdeSheet();
+}
+
+// =====================
+// CARGAR PRODUCTOS
+// =====================
+async function cargarProductosDesdeSheet() {
+  document.getElementById('sheet-status-text').textContent = 'Cargando...';
+
+  // Si hay datos en localStorage los usamos (modo offline / demo)
+  if (productos.length > 0) {
+    renderProductos(productos);
+    document.getElementById('sheet-status-text').textContent = 'Stock cargado (local)';
+    return;
+  }
+
+  if (!config.sheetUrl) return;
+
+  try {
+    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(config.sheetUrl)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const csv = data.contents;
+    productos = parsearCSV(csv);
+    localStorage.setItem('tienda_productos', JSON.stringify(productos));
+    renderProductos(productos);
+    document.getElementById('sheet-status-text').textContent = 'Conectado a Sheet ✓';
+  } catch (e) {
+    // Datos demo si falla la conexión
+    productos = getDemoProductos();
+    localStorage.setItem('tienda_productos', JSON.stringify(productos));
+    renderProductos(productos);
+    document.getElementById('sheet-status-text').textContent = 'Modo demo (sin conexión)';
+  }
+}
+
+function parsearCSV(csv) {
+  const lineas = csv.trim().split('\n');
+  // Asumimos: Nombre, Cantidad, Precio, ImagenURL (primera fila = headers)
+  return lineas.slice(1).map((linea, i) => {
+    const cols = linea.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+    return {
+      id: i,
+      nombre: cols[0] || 'Producto',
+      stock: parseInt(cols[1]) || 0,
+      precio: parseFloat(cols[2]) || 0,
+      imagen: cols[3] || null,
+      categoria: cols[4] || 'General'
+    };
+  }).filter(p => p.nombre);
+}
+
+function getDemoProductos() {
+  return [
+    { id: 0, nombre: 'Remera manga corta', stock: 10, precio: 5500, imagen: null, categoria: 'Ropa' },
+    { id: 1, nombre: 'Buzo hoodie', stock: 5, precio: 12000, imagen: null, categoria: 'Ropa' },
+    { id: 2, nombre: 'Botín de entrenamiento', stock: 8, precio: 18000, imagen: null, categoria: 'Calzado' },
+    { id: 3, nombre: 'Medias deportivas', stock: 20, precio: 1500, imagen: null, categoria: 'Accesorios' },
+    { id: 4, nombre: 'Short de juego', stock: 0, precio: 4200, imagen: null, categoria: 'Ropa' },
+    { id: 5, nombre: 'Mochila escolar', stock: 3, precio: 22000, imagen: null, categoria: 'Accesorios' },
+  ];
+}
+
+// =====================
+// RENDER PRODUCTOS
+// =====================
+function renderProductos(lista) {
+  // Chips de categoría
+  const cats = ['Todos', ...new Set(lista.map(p => p.categoria))];
+  const chipsEl = document.getElementById('chips-filtro');
+  chipsEl.innerHTML = cats.map((c, i) =>
+    `<div class="chip ${i===0?'active':''}" onclick="filtrarCat('${c}', this)">${c}</div>`
+  ).join('');
+
+  renderGrid(lista);
+}
+
+function filtrarCat(cat, el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const lista = cat === 'Todos' ? productos : productos.filter(p => p.categoria === cat);
+  renderGrid(lista);
+}
+
+function renderGrid(lista) {
+  const grid = document.getElementById('grid-productos');
+  grid.innerHTML = lista.map(p => {
+    const agotado = p.stock <= 0;
+    const stockLabel = agotado ? '<span class="stock-out">Agotado</span>'
+      : p.stock <= 3 ? `<span class="stock-low">Últimos ${p.stock}</span>`
+      : `<span class="stock-ok">${p.stock} disponibles</span>`;
+    const qty = carrito[p.id] || 0;
+
+    return `
+      <div class="producto-card ${agotado?'agotado':''} ${qty>0?'selected':''}" id="card-${p.id}" onclick="seleccionar(${p.id})">
+        <div class="check-icon">✓</div>
+        ${agotado ? '<div class="badge-agotado">Agotado</div>' : ''}
+        <div class="producto-img">
+          ${p.imagen ? `<img src="${p.imagen}" onerror="this.parentElement.innerHTML='🛍️'" alt="${p.nombre}">` : '🛍️'}
+        </div>
+        <div class="producto-info">
+          <div class="producto-nombre">${p.nombre}</div>
+          <div class="producto-precio">$${p.precio.toLocaleString('es-AR')}</div>
+          ${stockLabel}
+          ${qty > 0 ? `
+          <div class="qty-selector" onclick="event.stopPropagation()">
+            <button class="qty-btn" onclick="cambiarQty(${p.id}, -1)">−</button>
+            <span class="qty-val">${qty}</span>
+            <button class="qty-btn" onclick="cambiarQty(${p.id}, 1)">+</button>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  actualizarCarrito();
+}
+
+function seleccionar(id) {
+  if (!carrito[id]) carrito[id] = 1;
+  const p = productos.find(p => p.id === id);
+  if (carrito[id] > p.stock) carrito[id] = p.stock;
+  renderGrid(productos.filter(p => {
+    const chips = document.querySelector('.chip.active');
+    return !chips || chips.textContent === 'Todos' || p.categoria === chips.textContent;
+  }));
+}
+
+function cambiarQty(id, delta) {
+  const p = productos.find(p => p.id === id);
+  carrito[id] = (carrito[id] || 0) + delta;
+  if (carrito[id] <= 0) delete carrito[id];
+  if (carrito[id] > p.stock) carrito[id] = p.stock;
+  const chip = document.querySelector('.chip.active');
+  const cat = chip ? chip.textContent : 'Todos';
+  const lista = cat === 'Todos' ? productos : productos.filter(p => p.categoria === cat);
+  renderGrid(lista);
+}
+
+function actualizarCarrito() {
+  const items = Object.entries(carrito);
+  const carritoEl = document.getElementById('carrito');
+
+  if (items.length === 0) {
+    carritoEl.style.display = 'none';
+    return;
+  }
+
+  carritoEl.style.display = 'block';
+  let total = 0;
+  const html = items.map(([id, qty]) => {
+    const p = productos.find(p => p.id == id);
+    const sub = p.precio * qty;
+    total += sub;
+    return `<div class="carrito-item">
+      <span>${p.nombre} × ${qty}</span>
+      <span style="color:var(--accent2);font-weight:600">$${sub.toLocaleString('es-AR')}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('carrito-items').innerHTML = html;
+  document.getElementById('total-precio').textContent = `$${total.toLocaleString('es-AR')}`;
+}
+
+// =====================
+// FLUJO PASOS
+// =====================
+function irAPaso2() {
+  if (Object.keys(carrito).length === 0) { notif('Seleccioná al menos un producto', true); return; }
+  irAPaso(2);
+}
+
+function irAPaso3() {
+  const nombre = document.getElementById('nombre-comprador').value.trim();
+  if (!nombre) { notif('Ingresá tu nombre', true); return; }
+  // Actualizar monto
+  const total = calcularTotal();
+  document.getElementById('monto-pagar').textContent = `$${total.toLocaleString('es-AR')}`;
+  document.getElementById('alias-text').textContent = config.mpAlias || 'alias.mp';
+  irAPaso(3);
+}
+
+function calcularTotal() {
+  return Object.entries(carrito).reduce((acc, [id, qty]) => {
+    const p = productos.find(p => p.id == id);
+    return acc + p.precio * qty;
+  }, 0);
+}
+
+function irAPaso(n) {
+  const mapas = { 1: 'productos', 2: 'datos', 3: 'pago', 4: 'exito' };
+  mostrarPantalla(mapas[n]);
+  pasoActual = n;
+  // Update steps UI
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`step${i}`);
+    el.className = 'step' + (i === n ? ' active' : i < n ? ' done' : '');
+  }
+}
+
+function mostrarPantalla(nombre) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${nombre}`).classList.add('active');
+}
+
+// =====================
+// COMPROBANTE
+// =====================
+function previewComprobante(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    comprobanteBase64 = e.target.result;
+    const prev = document.getElementById('comprobante-preview');
+    prev.src = comprobanteBase64;
+    prev.style.display = 'block';
+    document.querySelector('.upload-icon').style.display = 'none';
+    document.querySelector('.upload-text').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function copiarAlias() {
+  navigator.clipboard.writeText(config.mpAlias || '').then(() => notif('Alias copiado ✓'));
+}
+
+// =====================
+// CONFIRMAR PEDIDO
+// =====================
+async function confirmarPedido() {
+  if (!comprobanteBase64) { notif('Subí el comprobante de pago', true); return; }
+
+  const nombre = document.getElementById('nombre-comprador').value.trim();
+  const items = Object.entries(carrito).map(([id, qty]) => {
+    const p = productos.find(p => p.id == id);
+    return { nombre: p.nombre, cantidad: qty, precio: p.precio };
+  });
+  const total = calcularTotal();
+  const fecha = new Date().toLocaleString('es-AR');
+
+  // Registrar venta localmente
+  const venta = { id: Date.now(), nombre, items, total, fecha, comprobante: comprobanteBase64 };
+  ventas.push(venta);
+  localStorage.setItem('tienda_ventas', JSON.stringify(ventas));
+
+  // Descontar stock
+  Object.entries(carrito).forEach(([id, qty]) => {
+    const idx = productos.findIndex(p => p.id == id);
+    if (idx !== -1) productos[idx].stock = Math.max(0, productos[idx].stock - qty);
+  });
+  localStorage.setItem('tienda_productos', JSON.stringify(productos));
+
+  // Enviar al webhook (Google Apps Script) si está configurado
+  if (config.webhookUrl) {
+    try {
+      await fetch(config.webhookUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, items, total, fecha })
+      });
+    } catch (e) { /* silencioso */ }
+  }
+
+  // Mostrar resumen
+  document.getElementById('resumen-final').innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:left;margin-top:1rem;font-size:0.85rem">
+      <div style="color:var(--muted);margin-bottom:0.5rem">Resumen del pedido</div>
+      ${items.map(i => `<div style="display:flex;justify-content:space-between;padding:0.3rem 0;border-bottom:1px solid var(--border)"><span>${i.nombre} ×${i.cantidad}</span><span>$${(i.precio*i.cantidad).toLocaleString('es-AR')}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;margin-top:0.75rem;font-weight:700"><span>Total</span><span style="color:var(--accent2)">$${total.toLocaleString('es-AR')}</span></div>
+    </div>`;
+
+  irAPaso(4);
+  carrito = {};
+  comprobanteBase64 = null;
+}
+
+function nuevoOrden() {
+  carrito = {};
+  document.getElementById('nombre-comprador').value = '';
+  document.getElementById('comprobante-preview').style.display = 'none';
+  document.querySelector('.upload-icon').style.display = 'block';
+  document.querySelector('.upload-text').style.display = 'block';
+  irAPaso(1);
+  renderGrid(productos);
+}
+
+// =====================
+// ADMIN
+// =====================
+const ADMIN_PASS = 'admin123';
+let adminVerificado = false;
+
+function toggleAdmin() {
+  const panel = document.getElementById('admin-panel');
+  panel.classList.toggle('open');
+}
+
+function verificarAdmin() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === ADMIN_PASS) {
+    adminVerificado = true;
+    document.getElementById('admin-content').style.display = 'block';
+    renderAdminStock();
+    renderAdminVentas();
+  } else {
+    notif('Contraseña incorrecta', true);
+  }
+}
+
+function renderAdminStock() {
+  const tbody = document.getElementById('tbody-stock');
+  tbody.innerHTML = productos.map(p => `
+    <tr>
+      <td>${p.nombre}</td>
+      <td>$${p.precio.toLocaleString('es-AR')}</td>
+      <td><input type="number" value="${p.stock}" min="0" onchange="updateStockLocal(${p.id}, this.value)"></td>
+      <td style="color:${p.stock===0?'var(--danger)':p.stock<=3?'var(--accent2)':'var(--success)'}">
+        ${p.stock === 0 ? '●' : p.stock <= 3 ? '●' : '●'}
+      </td>
+    </tr>`).join('');
+}
+
+function updateStockLocal(id, val) {
+  const idx = productos.findIndex(p => p.id === id);
+  if (idx !== -1) productos[idx].stock = parseInt(val) || 0;
+}
+
+function guardarStock() {
+  localStorage.setItem('tienda_productos', JSON.stringify(productos));
+  notif('Stock actualizado ✓');
+  renderGrid(productos);
+}
+
+function renderAdminVentas() {
+  const el = document.getElementById('ventas-list');
+  if (ventas.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:0.85rem">Sin ventas registradas aún.</div>'; return; }
+  el.innerHTML = [...ventas].reverse().map(v => `
+    <div class="venta-row">
+      <div class="venta-info">
+        <strong>${v.nombre}</strong>
+        <span>${v.fecha} — $${v.total.toLocaleString('es-AR')}</span><br>
+        <span style="color:var(--muted)">${v.items.map(i=>`${i.nombre} ×${i.cantidad}`).join(', ')}</span>
+      </div>
+      ${v.comprobante ? `<div class="venta-comprobante"><img src="${v.comprobante}" onclick="verImagen('${v.comprobante}')" title="Ver comprobante"></div>` : ''}
+    </div>`).join('');
+}
+
+function verImagen(src) {
+  window.open(src, '_blank');
+}
+
+function exportarCSV() {
+  const header = 'ID,Nombre,Productos,Total,Fecha\n';
+  const rows = ventas.map(v =>
+    `${v.id},"${v.nombre}","${v.items.map(i=>`${i.nombre} x${i.cantidad}`).join(' | ')}",${v.total},"${v.fecha}"`
+  ).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ventas_tienda.csv';
+  a.click();
+}
+
+// =====================
+// NOTIF
+// =====================
+function notif(msg, error = false) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.style.background = error ? 'var(--danger)' : 'var(--success)';
+  el.style.color = error ? '#fff' : '#000';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// Drag & drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    const input = document.getElementById('comprobante-file');
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    previewComprobante(input);
+  }
+});
+</script>
+</body>
+</html>
